@@ -2,11 +2,14 @@ import {
   Stack,
   StackProps,
   SecretValue,
+  RemovalPolicy,
   aws_codepipeline as codepipeline,
   aws_codepipeline_actions as codepipelineActions,
   aws_codebuild as codebuild,
   aws_s3 as s3,
-  RemovalPolicy,
+  aws_cloudfront as cloudfront,
+  aws_cloudfront_origins as cfOrigins,
+  aws_iam as iam
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
@@ -38,12 +41,12 @@ export class InfraStack extends Stack {
               },
               commands: [
                 'cd app',
-                'npm install pnpm -g', 
+                'npm install pnpm -g',
                 'pnpm install'
               ],
             },
             build: {
-              commands: [ 'pnpm run build' ],
+              commands: ['pnpm run build'],
             },
           },
           artifacts: {
@@ -62,8 +65,33 @@ export class InfraStack extends Stack {
 
     const bucket = new s3.Bucket(this, 'ViteStiteBucket', {
       websiteIndexDocument: 'index.html',
-      publicReadAccess: true,
       removalPolicy: RemovalPolicy.DESTROY,
+    })
+    
+    // Add a policy statement to allow public read access
+    bucket.addToResourcePolicy(new iam.PolicyStatement({
+      actions: ['s3:GetObject'],
+      resources: [bucket.arnForObjects('*')],
+      principals: [new iam.AnyPrincipal()],
+    }));
+
+    const originAccess = new cloudfront.OriginAccessIdentity(this, 'OriginAccessControl', {
+      comment: 'Vite site'
+    });
+
+    new cloudfront.Distribution(this, 'ViteSiteDistribution', {
+      defaultBehavior: {
+        origin: new cfOrigins.S3Origin(bucket, { originAccessIdentity: originAccess }),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.ALLOW_ALL,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS
+      },
+      errorResponses: [
+        {
+          httpStatus: 403,
+          responsePagePath: '/index.html',
+          responseHttpStatus: 200
+        }
+      ],
     })
 
     const deployAction = new codepipelineActions.S3DeployAction({
@@ -80,7 +108,7 @@ export class InfraStack extends Stack {
 
     pipeline.addStage({
       stageName: 'Source',
-      actions:[sourceAction],
+      actions: [sourceAction],
     })
 
     pipeline.addStage({
