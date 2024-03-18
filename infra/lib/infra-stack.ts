@@ -34,7 +34,7 @@ export class InfraStack extends Stack {
             install: {
               commands: [
                 'cd app',
-                'npm install pnpm', 
+                'npm install pnpm -g', 
                 'pnpm install'
               ],
             },
