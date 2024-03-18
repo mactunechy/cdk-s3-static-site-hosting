@@ -6,6 +6,7 @@ import {
   aws_codepipeline_actions as codepipelineActions,
   aws_codebuild as codebuild,
   aws_s3 as s3,
+  RemovalPolicy,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
@@ -60,7 +61,9 @@ export class InfraStack extends Stack {
     })
 
     const bucket = new s3.Bucket(this, 'ViteStiteBucket', {
-      websiteIndexDocument: 'index.html'
+      websiteIndexDocument: 'index.html',
+      publicReadAccess: true,
+      removalPolicy: RemovalPolicy.DESTROY,
     })
 
     const deployAction = new codepipelineActions.S3DeployAction({
