@@ -67,7 +67,7 @@ export class InfraStack extends Stack {
       websiteIndexDocument: 'index.html',
       removalPolicy: RemovalPolicy.DESTROY,
     })
-    
+
     // Add a policy statement to allow public read access
     bucket.addToResourcePolicy(new iam.PolicyStatement({
       actions: ['s3:GetObject'],
@@ -88,7 +88,7 @@ export class InfraStack extends Stack {
       errorResponses: [
         {
           httpStatus: 403,
-          responsePagePath: '/index.html',
+          responsePagePath: '/error.html',
           responseHttpStatus: 200
         }
       ],
