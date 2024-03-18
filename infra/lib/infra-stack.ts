@@ -1,3 +1,4 @@
+import { Construct } from 'constructs';
 import {
   Stack,
   StackProps,
@@ -11,7 +12,6 @@ import {
   aws_cloudfront_origins as cfOrigins,
   aws_iam as iam
 } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
 
 export class InfraStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
