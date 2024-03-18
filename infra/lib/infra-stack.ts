@@ -32,6 +32,9 @@ export class InfraStack extends Stack {
           version: '0.2',
           phases: {
             install: {
+              'runtime-versions': {
+                nodejs: 'latest' //TODO: use a specific version
+              },
               commands: [
                 'cd app',
                 'npm install pnpm -g', 
@@ -47,7 +50,10 @@ export class InfraStack extends Stack {
             'base-directory': 'app/dist',
           },
 
-        })
+        }),
+        environment: {
+          buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_5,
+        }
       }),
       input: sourceOutput,
       outputs: [buildOutput],
