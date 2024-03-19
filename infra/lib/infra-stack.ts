@@ -10,7 +10,7 @@ import {
   aws_s3 as s3,
   aws_cloudfront as cloudfront,
   aws_cloudfront_origins as cfOrigins,
-  aws_iam as iam
+
 } from 'aws-cdk-lib';
 
 export class InfraStack extends Stack {
@@ -66,14 +66,14 @@ export class InfraStack extends Stack {
     const bucket = new s3.Bucket(this, 'ViteStiteBucket', {
       websiteIndexDocument: 'index.html',
       removalPolicy: RemovalPolicy.DESTROY,
+      blockPublicAccess: {
+        blockPublicAcls: false,
+        blockPublicPolicy: false,
+        ignorePublicAcls: false,
+        restrictPublicBuckets: false,
+      },
+      publicReadAccess: true,
     })
-
-    // Add a policy statement to allow public read access
-    bucket.addToResourcePolicy(new iam.PolicyStatement({
-      actions: ['s3:GetObject'],
-      resources: [bucket.arnForObjects('*')],
-      principals: [new iam.AnyPrincipal()],
-    }));
 
     const viteSiteOAI = new cloudfront.OriginAccessIdentity(this, 'OriginAccessControl', {
       comment: 'Vite site OAI'
