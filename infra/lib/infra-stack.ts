@@ -37,7 +37,7 @@ export class InfraStack extends Stack {
           phases: {
             install: {
               'runtime-versions': {
-                nodejs: 'latest' //TODO: use a specific version
+                nodejs: '20.x'
               },
               commands: [
                 'cd app',
@@ -75,13 +75,13 @@ export class InfraStack extends Stack {
       principals: [new iam.AnyPrincipal()],
     }));
 
-    const originAccess = new cloudfront.OriginAccessIdentity(this, 'OriginAccessControl', {
-      comment: 'Vite site'
+    const viteSiteOAI = new cloudfront.OriginAccessIdentity(this, 'OriginAccessControl', {
+      comment: 'Vite site OAI'
     });
 
     new cloudfront.Distribution(this, 'ViteSiteDistribution', {
       defaultBehavior: {
-        origin: new cfOrigins.S3Origin(bucket, { originAccessIdentity: originAccess }),
+        origin: new cfOrigins.S3Origin(bucket, { originAccessIdentity: viteSiteOAI }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.ALLOW_ALL,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS
       },
